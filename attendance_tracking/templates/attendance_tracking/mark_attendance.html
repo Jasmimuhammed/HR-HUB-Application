@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance & Time Tracking</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ3Qx1oKep5u4L16w7A5wWyy4D5Jbvy8zQjm2p3bAKQbZ2eW2wJwG7enFiAo" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .card {
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .btn {
+            border-radius: 5px;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        .timer-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        .card-footer {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            text-align: center;
+            padding: 10px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="container">
+
+    <div class="card">
+       
+        <form method="post" id="attendanceForm">
+            {% csrf_token %}
+            <div class="card-header">
+                <h4>Attendance</h4>
+            </div>
+
+            <div class="mb-4">
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status:</label>
+                    <select id="status" name="status" class="form-select" required>
+                        <option value="" disabled selected>-- Select Status --</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Mark Attendance Button -->
+            <div class="mb-3">
+                <button type="submit" class="btn btn-info w-100">Check-in</button>
+            </div>
+        </form>
+
+        <!-- Time Tracking Section (Initially Hidden) -->
+        <div class="timer-section" id="timeTrackingSection">
+            <h4 class="text-primary">Time Tracking</h4>
+            <div class="mb-3">
+                <label for="timer" class="form-label">Timer:</label>
+                <input type="text" id="timer" name="timer" class="form-control" disabled placeholder="00:00:00">
+            </div>
+
+            <!-- Total Hours Worked -->
+            <div class="mb-3">
+                <label for="total_hours" class="form-label">Total Hours Worked:</label>
+                <input type="text" id="total_hours" name="total_hours" class="form-control" disabled placeholder="0.00">
+            </div>
+
+            <!-- Timer Toggle Button -->
+            <button type="button" class="btn btn-warning w-100" id="toggleTimerButton">Start Timer</button>
+        </div>
+
+        <!-- Separate Form for Check-out Button (Initially Hidden) -->
+        <form method="post" id="checkOutForm">
+            {% csrf_token %}
+            <div class="mb-3">
+                <!-- Initially hidden check-out button -->
+                <button type="submit" class="btn btn-success w-100" id="checkOutButton" style="display: none;">Check-out</button>
+            </div>
+        </form>
+         <!-- Back Button -->
+         <div class="mb-3">
+            <a href="javascript:history.back()" class="btn btn-secondary w-100">Back</a>
+        </div>
+
+        <div class="card-footer">
+            <small>&copy; 2025 HRHub - Attendance & Time Tracking</small>
+        </div>
+        
+       
+    </div>
+</div>
+
+<script>
+    let timerRunning = false;
+    let startTime, endTime;
+    let totalTime = 0;
+    let timerInterval;
+
+    const toggleTimerButton = document.getElementById("toggleTimerButton");
+    const timerInput = document.getElementById("timer");
+    const totalHoursInput = document.getElementById("total_hours");
+    const timeTrackingSection = document.getElementById("timeTrackingSection");
+    const checkOutButton = document.getElementById("checkOutButton");
+    const statusSelect = document.getElementById("status");
+
+    // Event listener for attendance form submission
+    document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Only start the timer and show time tracking if the status is "Present"
+        if (statusSelect.value === "Present") {
+            // Start the timer when the user marks attendance
+            startTime = new Date();
+            timerRunning = true;
+
+            // Display time tracking section and timer
+            timeTrackingSection.style.display = "block";
+            toggleTimerButton.textContent = "Stop Timer";
+
+            // Show the check-out button
+            checkOutButton.style.display = "block";
+
+            // Start the timer interval
+            timerInterval = setInterval(function() {
+                if (timerRunning) {
+                    const elapsedTime = new Date() - startTime;
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    timerInput.value = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+                }
+            }, 1000);
+        } else {
+            // Do not show time tracking section for "Absent"
+            timeTrackingSection.style.display = "none";
+            checkOutButton.style.display = "none";
+        }
+    });
+
+    // Helper function to pad the timer
+    function padZero(num) {
+        return num < 10 ? "0" + num : num;
+    }
+
+    // Timer toggle functionality
+    toggleTimerButton.addEventListener("click", function() {
+        if (timerRunning) {
+            // Stop the timer
+            endTime = new Date();
+            const duration = (endTime - startTime) / 1000 / 3600; // Duration in hours
+            totalTime += duration;
+            totalHoursInput.value = totalTime.toFixed(2); // Update total hours input
+            clearInterval(timerInterval);
+            toggleTimerButton.textContent = "Start Timer";
+            timerRunning = false;
+        } else {
+            // Start the timer
+            startTime = new Date();
+            timerRunning = true;
+            toggleTimerButton.textContent = "Stop Timer";
+            // Restart the timer interval
+            timerInterval = setInterval(function() {
+                if (timerRunning) {
+                    const elapsedTime = new Date() - startTime;
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    timerInput.value = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+                }
+            }, 1000);
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!-- Modal for Deleting Employee -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="employee-name"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="delete-form" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to update the modal dynamically based on the employee to delete
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var employeeId = button.getAttribute('data-employee-id');
+        var employeeName = button.getAttribute('data-employee-name');
+        
+        // Update the modal content with the employee name
+        var modalBody = deleteModal.querySelector('#employee-name');
+        var form = deleteModal.querySelector('#delete-form');
+
+        modalBody.textContent = employeeName;
+        
+        // Update form action to include employee ID for deletion
+        form.action = "{% url 'employee_management:employee_delete' 0 %}".replace('0', employeeId);
+    });
+</script>

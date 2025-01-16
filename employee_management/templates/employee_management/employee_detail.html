@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Detail</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+   <div class="container mt-5">
+        <h1 class="text-center mb-4">Employee Detail</h1>
+
+        <div> 
+            {% if employee.profile_picture %}
+            <img src="{{ employee.profile_picture.url }}">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </div><br>
+        
+        <div class="card">
+            <div class="card-body">
+                <dl class="row">
+                    
+                    <dt class="col-sm-4"><strong>First Name:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.first_name }}</dd>
+
+                    <dt class="col-sm-4"><strong>Last Name:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.last_name }}</dd>
+
+                    <dt class="col-sm-4"><strong>Email:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.email }}</dd>
+
+                    <dt class="col-sm-4"><strong>Phone Number:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.phone_number }}</dd>
+
+                    <dt class="col-sm-4"><strong>Address:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.address }}</dd>
+
+                    <dt class="col-sm-4"><strong>Date of Birth:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.date_of_birth }}</dd>
+
+                    <dt class="col-sm-4"><strong>Date of Joining:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.date_of_joining }}</dd>
+
+                    <dt class="col-sm-4"><strong>Status:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.status }}</dd>
+
+                    <dt class="col-sm-4"><strong>Department:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.department.name }}</dd>
+
+                    <dt class="col-sm-4"><strong>Role:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.role.title }}</dd>
+
+                    <dt class="col-sm-4"><strong>Manager:</strong></dt>
+                    <dd class="col-sm-8">{{ employee.manager.full_name }}</dd>
+                </dl>
+
+                <div class="text-center">
+                    <a href="{% url 'employee_management:employee_update' employee.pk %}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{% url 'employee_management:employee_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

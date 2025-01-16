@@ -1,0 +1,14 @@
+test -3
+1).D =15
+2).B =84
+3).C= MPS
+4).C =EFGFODF
+5).A=9
+6).D=12
+7).D=44
+8).B=444
+9).C=SISTER
+10).B=R
+13). exception handling is a purpose of handling the bugs or errors in the programe during the execution.this process will not crash the program.it is more help to smoothly runing of program.using the exception handling we can deal with multiple errors.
+the basic parts of execption handling 
+try,execpt,else
